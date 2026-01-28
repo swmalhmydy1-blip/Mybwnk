@@ -1,0 +1,155 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>نظام بنك القطيبي المصغر</title>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.rtl.min.css">
+    <style>
+        body { background-color: #f4f7f6; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; }
+        .card { border-radius: 15px; box-shadow: 0 4px 15px rgba(0,0,0,0.1); margin-top: 20px; }
+        .btn-primary { background-color: #C3D737; border: none; color: #333; font-weight: bold; }
+        .btn-primary:hover { background-color: #acc12a; }
+        #dashboard { display: none; }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <section id="loginSection" class="row justify-content-center">
+        <div class="col-md-5">
+            <div class="card p-4">
+                <div class="text-center mb-4">
+                    <img src="/InternetBanking/img/qt/icon.png" onerror="this.src='https://via.placeholder.com/50'" width="50">
+                    <h4 class="mt-2">تسجيل الدخول / إنشاء حساب</h4>
+                </div>
+                <div class="mb-3">
+                    <label>اسم المستخدم</label>
+                    <input type="text" id="username" class="form-control" placeholder="أدخل اسمك">
+                </div>
+                <div class="mb-3">
+                    <label>كلمة المرور</label>
+                    <input type="password" id="password" class="form-control" placeholder="******">
+                </div>
+                <button class="btn btn-primary w-100" onclick="handleAuth()">دخول / تسجيل جديد</button>
+            </div>
+        </div>
+    </section>
+
+    <section id="dashboard">
+        <div class="row mt-4">
+            <div class="col-12 text-center">
+                <h3>مرحباً، <span id="displayName"></span>!</h3>
+                <div class="card bg-dark text-white p-3 d-inline-block">
+                    <h5>رصيدك الحالي: <span id="balanceDisplay">0</span> ريال</h5>
+                </div>
+            </div>
+        </div>
+
+        <div class="row">
+            <div class="col-md-6">
+                <div class="card p-4">
+                    <h5>العمليات النقدية (إيداع / سحب)</h5>
+                    <div class="input-group mb-3">
+                        <input type="number" id="amount" class="form-control" placeholder="المبلغ">
+                        <button class="btn btn-success" onclick="processTransaction('deposit')">إيداع</button>
+                        <button class="btn btn-danger" onclick="processTransaction('withdraw')">سحب</button>
+                    </div>
+                </div>
+            </div>
+
+            <div class="col-md-6">
+                <div class="card p-4">
+                    <h5>تحويل لمستخدم آخر</h5>
+                    <input type="text" id="targetUser" class="form-control mb-2" placeholder="اسم المستخدم المستلم">
+                    <input type="number" id="transferAmount" class="form-control mb-2" placeholder="المبلغ">
+                    <button class="btn btn-primary w-100" onclick="handleTransfer()">إرسال حوالة</button>
+                </div>
+            </div>
+        </div>
+
+        <div class="text-center mt-4">
+            <button class="btn btn-secondary btn-sm" onclick="logout()">تسجيل الخروج</button>
+        </div>
+    </section>
+</div>
+
+<script>
+    // نظام إدارة البيانات البسيط
+    let currentUser = null;
+
+    function handleAuth() {
+        const user = document.getElementById('username').value;
+        const pass = document.getElementById('password').value;
+
+        if(!user || !pass) return alert("يرجى ملء كافة الحقول");
+
+        let accounts = JSON.parse(localStorage.getItem('bank_accounts')) || {};
+
+        if(!accounts[user]) {
+            // إنشاء حساب جديد إذا لم يكن موجوداً
+            accounts[user] = { password: pass, balance: 0 };
+            localStorage.setItem('bank_accounts', JSON.stringify(accounts));
+            alert("تم إنشاء حساب جديد لك بنجاح!");
+        } else {
+            if(accounts[user].password !== pass) return alert("كلمة المرور خاطئة");
+        }
+
+        currentUser = user;
+        showDashboard();
+    }
+
+    function showDashboard() {
+        document.getElementById('loginSection').style.display = 'none';
+        document.getElementById('dashboard').style.display = 'block';
+        document.getElementById('displayName').innerText = currentUser;
+        updateUI();
+    }
+
+    function updateUI() {
+        let accounts = JSON.parse(localStorage.getItem('bank_accounts'));
+        document.getElementById('balanceDisplay').innerText = accounts[currentUser].balance.toLocaleString();
+    }
+
+    function processTransaction(type) {
+        const amt = parseFloat(document.getElementById('amount').value);
+        if(isNaN(amt) || amt <= 0) return alert("أدخل مبلغاً صحيحاً");
+
+        let accounts = JSON.parse(localStorage.getItem('bank_accounts'));
+        
+        if(type === 'deposit') {
+            accounts[currentUser].balance += amt;
+        } else {
+            if(accounts[currentUser].balance < amt) return alert("رصيدك غير كافٍ");
+            accounts[currentUser].balance -= amt;
+        }
+
+        localStorage.setItem('bank_accounts', JSON.stringify(accounts));
+        updateUI();
+        document.getElementById('amount').value = '';
+    }
+
+    function handleTransfer() {
+        const target = document.getElementById('targetUser').value;
+        const amt = parseFloat(document.getElementById('transferAmount').value);
+        let accounts = JSON.parse(localStorage.getItem('bank_accounts'));
+
+        if(!accounts[target]) return alert("المستخدم المستلم غير موجود");
+        if(target === currentUser) return alert("لا يمكنك التحويل لنفسك");
+        if(isNaN(amt) || amt > accounts[currentUser].balance) return alert("خطأ في المبلغ أو الرصيد غير كافٍ");
+
+        accounts[currentUser].balance -= amt;
+        accounts[target].balance += amt;
+
+        localStorage.setItem('bank_accounts', JSON.stringify(accounts));
+        updateUI();
+        alert(`تم تحويل ${amt} إلى ${target} بنجاح`);
+    }
+
+    function logout() {
+        location.reload();
+    }
+</script>
+
+</body>
+</html>
