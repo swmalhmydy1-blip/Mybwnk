@@ -16,12 +16,6 @@
         .card-hover:hover {
             transform: translateY(-5px);
             transition: transform 0.3s ease;
-            box-shadow: 0 10px 25px rgba(0,0,0,0.1);
-        }
-        .neumorphic {
-            background: #f0f0f0;
-            border-radius: 20px;
-            box-shadow: 12px 12px 24px #d9d9d9, -12px -12px 24px #ffffff;
         }
         .scrollbar-thin::-webkit-scrollbar {
             width: 6px;
@@ -33,917 +27,1124 @@
             background: #888;
             border-radius: 3px;
         }
+        .animate-pulse {
+            animation: pulse 2s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+        }
+        @keyframes pulse {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.5; }
+        }
     </style>
 </head>
 <body class="min-h-screen">
-
-    <!-- شريط التنقل العلوي -->
-    <nav class="bg-gradient-to-l from-[#004a99] to-[#0066cc] text-white p-4 shadow-xl sticky top-0 z-50">
-        <div class="max-w-7xl mx-auto flex justify-between items-center">
-            <div class="flex items-center space-x-4 space-x-reverse">
-                <div class="bg-white p-2 rounded-lg">
-                    <img src="https://img.icons8.com/color/48/000000/bank-building.png" alt="القطيبي" class="w-10 h-10">
+    
+    <!-- شاشة تسجيل الدخول -->
+    <div id="login-screen" class="fixed inset-0 bg-gradient-to-br from-blue-900 to-blue-700 flex items-center justify-center z-50">
+        <div class="bg-white rounded-2xl p-8 max-w-md w-full mx-4">
+            <div class="text-center mb-8">
+                <div class="bg-blue-600 inline-block p-4 rounded-2xl mb-4">
+                    <i class="fas fa-university text-white text-4xl"></i>
                 </div>
-                <div>
-                    <h1 class="text-2xl font-bold">القطيبي الإلكتروني</h1>
-                    <p class="text-sm opacity-80">خدمات مصرفية متكاملة وآمنة</p>
-                </div>
+                <h2 class="text-2xl font-bold text-gray-800">القطيبي الإلكتروني</h2>
+                <p class="text-gray-600 mt-2">تسجيل الدخول إلى حسابك</p>
             </div>
             
-            <div class="flex items-center space-x-6 space-x-reverse">
-                <div class="hidden md:block">
-                    <span id="user-name" class="font-bold">محمد أحمد القطيبي</span>
-                    <div class="flex items-center space-x-2 space-x-reverse">
-                        <span class="text-sm opacity-80">آخر دخول: </span>
-                        <span id="last-login" class="text-sm">اليوم 10:30 صباحاً</span>
-                    </div>
+            <div class="space-y-4">
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-1">رقم الحساب</label>
+                    <input type="text" id="login-account" placeholder="أدخل رقم الحساب" 
+                           class="w-full p-3 border-2 border-gray-200 rounded-xl focus:border-blue-500 outline-none">
                 </div>
-                <button onclick="toggleNotifications()" class="relative p-2">
-                    <i class="fas fa-bell text-xl"></i>
-                    <span id="notification-badge" class="absolute -top-1 -left-1 bg-red-500 text-white text-xs rounded-full w-5 h-5 flex items-center justify-center hidden">3</span>
+                
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-1">الرقم السري</label>
+                    <input type="password" id="login-pin" placeholder="أدخل الرقم السري (6 أرقام)" 
+                           class="w-full p-3 border-2 border-gray-200 rounded-xl focus:border-blue-500 outline-none" maxlength="6">
+                </div>
+                
+                <button onclick="login()" class="w-full bg-gradient-to-r from-blue-600 to-blue-700 text-white py-3 rounded-xl font-bold hover:from-blue-700 hover:to-blue-800 transition">
+                    <i class="fas fa-sign-in-alt ml-2"></i> تسجيل الدخول
                 </button>
-                <button onclick="toggleDarkMode()" class="p-2">
-                    <i class="fas fa-moon text-xl"></i>
-                </button>
-                <button onclick="logout()" class="bg-red-500 hover:bg-red-600 px-4 py-2 rounded-lg flex items-center space-x-2 space-x-reverse">
-                    <i class="fas fa-sign-out-alt"></i>
-                    <span>تسجيل الخروج</span>
-                </button>
+                
+                <div class="text-center mt-4">
+                    <p class="text-sm text-gray-600">حساب تجريبي: 12209938 / 123456</p>
+                </div>
             </div>
         </div>
-    </nav>
+    </div>
 
-    <!-- قائمة جانبية -->
-    <div class="max-w-7xl mx-auto flex flex-col md:flex-row mt-6 p-4 gap-6">
-        <div class="md:w-1/4 space-y-4">
-            <!-- بطاقة المستخدم -->
-            <div class="bg-gradient-to-br from-blue-900 to-blue-700 text-white p-6 rounded-2xl shadow-xl">
-                <div class="flex justify-between items-start">
+    <!-- التطبيق الرئيسي (مخفي حتى تسجيل الدخول) -->
+    <div id="app" class="hidden">
+        <!-- شريط التنقل العلوي -->
+        <nav class="bg-gradient-to-l from-[#004a99] to-[#0066cc] text-white p-4 shadow-xl sticky top-0 z-40">
+            <div class="max-w-7xl mx-auto flex justify-between items-center">
+                <div class="flex items-center space-x-4 space-x-reverse">
+                    <div class="bg-white p-2 rounded-lg">
+                        <i class="fas fa-university text-blue-600 text-2xl"></i>
+                    </div>
                     <div>
-                        <p class="text-sm opacity-80">مرحباً بك</p>
-                        <h2 id="full-name" class="text-xl font-bold">محمد أحمد القطيبي</h2>
-                        <p id="user-acc" class="text-sm mt-2">حساب توفير • 12209938</p>
+                        <h1 class="text-2xl font-bold">القطيبي الإلكتروني</h1>
+                        <p class="text-sm opacity-80">خدمات مصرفية متكاملة وآمنة</p>
                     </div>
-                    <i class="fas fa-user-circle text-4xl opacity-80"></i>
                 </div>
                 
-                <div class="mt-6">
-                    <p class="text-sm">الرصيد المتاح</p>
-                    <h3 id="balance" class="text-3xl font-bold mt-1">0.00 <span class="text-xl">ريال يمني</span></h3>
-                </div>
-                
-                <div class="grid grid-cols-2 gap-4 mt-6">
-                    <div class="text-center">
-                        <p class="text-sm opacity-80">الدخل الشهري</p>
-                        <p class="font-bold">750,000 <span class="text-xs">ريال</span></p>
+                <div class="flex items-center space-x-6 space-x-reverse">
+                    <div class="hidden md:block text-left">
+                        <span id="user-name" class="font-bold">جاري التحميل...</span>
+                        <div class="flex items-center space-x-2 space-x-reverse">
+                            <span class="text-sm opacity-80">آخر دخول: </span>
+                            <span id="last-login" class="text-sm">جاري التحميل...</span>
+                        </div>
                     </div>
-                    <div class="text-center">
-                        <p class="text-sm opacity-80">المصروف الشهري</p>
-                        <p class="font-bold">420,000 <span class="text-xs">ريال</span></p>
-                    </div>
-                </div>
-            </div>
-
-            <!-- قائمة الخدمات -->
-            <div class="bg-white rounded-2xl shadow-lg p-4">
-                <h3 class="font-bold text-lg mb-4 border-b pb-2"><i class="fas fa-th-large ml-2"></i> الخدمات السريعة</h3>
-                <div class="grid grid-cols-2 gap-3">
-                    <button onclick="showSection('bills')" class="p-3 bg-blue-50 hover:bg-blue-100 rounded-xl text-center">
-                        <i class="fas fa-file-invoice-dollar text-blue-600 text-xl"></i>
-                        <p class="text-sm mt-1">دفع الفواتير</p>
+                    <button onclick="toggleNotifications()" class="relative p-2">
+                        <i class="fas fa-bell text-xl"></i>
+                        <span id="notification-badge" class="absolute -top-1 -left-1 bg-red-500 text-white text-xs rounded-full w-5 h-5 flex items-center justify-center hidden">0</span>
                     </button>
-                    <button onclick="showSection('cards')" class="p-3 bg-green-50 hover:bg-green-100 rounded-xl text-center">
-                        <i class="fas fa-credit-card text-green-600 text-xl"></i>
-                        <p class="text-sm mt-1">البطاقات</p>
-                    </button>
-                    <button onclick="showSection('loans')" class="p-3 bg-purple-50 hover:bg-purple-100 rounded-xl text-center">
-                        <i class="fas fa-hand-holding-usd text-purple-600 text-xl"></i>
-                        <p class="text-sm mt-1">التمويل</p>
-                    </button>
-                    <button onclick="showSection('invest')" class="p-3 bg-yellow-50 hover:bg-yellow-100 rounded-xl text-center">
-                        <i class="fas fa-chart-line text-yellow-600 text-xl"></i>
-                        <p class="text-sm mt-1">الاستثمار</p>
-                    </button>
-                    <button onclick="showSection('insurance')" class="p-3 bg-red-50 hover:bg-red-100 rounded-xl text-center">
-                        <i class="fas fa-shield-alt text-red-600 text-xl"></i>
-                        <p class="text-sm mt-1">التأمين</p>
-                    </button>
-                    <button onclick="showSection('support')" class="p-3 bg-gray-50 hover:bg-gray-100 rounded-xl text-center">
-                        <i class="fas fa-headset text-gray-600 text-xl"></i>
-                        <p class="text-sm mt-1">الدعم</p>
+                    <button onclick="logout()" class="bg-red-500 hover:bg-red-600 px-4 py-2 rounded-lg flex items-center space-x-2 space-x-reverse">
+                        <i class="fas fa-sign-out-alt"></i>
+                        <span>تسجيل الخروج</span>
                     </button>
                 </div>
             </div>
+        </nav>
 
-            <!-- أهداف الادخار -->
-            <div class="bg-white rounded-2xl shadow-lg p-4">
-                <h3 class="font-bold text-lg mb-4 border-b pb-2"><i class="fas fa-bullseye ml-2"></i> أهداف الادخار</h3>
-                <div class="space-y-3">
-                    <div>
-                        <div class="flex justify-between text-sm">
-                            <span>حج بيت الله</span>
-                            <span>65%</span>
+        <!-- المحتوى الرئيسي -->
+        <div class="max-w-7xl mx-auto flex flex-col md:flex-row mt-6 p-4 gap-6">
+            <!-- القائمة الجانبية -->
+            <div class="md:w-1/4 space-y-4">
+                <!-- بطاقة المستخدم -->
+                <div class="bg-gradient-to-br from-blue-900 to-blue-700 text-white p-6 rounded-2xl shadow-xl">
+                    <div class="flex justify-between items-start">
+                        <div>
+                            <p class="text-sm opacity-80">مرحباً بك</p>
+                            <h2 id="full-name" class="text-xl font-bold">جاري التحميل...</h2>
+                            <p id="user-acc" class="text-sm mt-2">جاري التحميل...</p>
                         </div>
-                        <div class="w-full bg-gray-200 rounded-full h-2">
-                            <div class="bg-green-500 h-2 rounded-full" style="width: 65%"></div>
-                        </div>
-                        <p class="text-xs text-gray-500 mt-1">5,200,000 / 8,000,000 ريال</p>
+                        <i class="fas fa-user-circle text-4xl opacity-80"></i>
                     </div>
-                    <div>
-                        <div class="flex justify-between text-sm">
-                            <span>شراء سيارة</span>
-                            <span>30%</span>
-                        </div>
-                        <div class="w-full bg-gray-200 rounded-full h-2">
-                            <div class="bg-blue-500 h-2 rounded-full" style="width: 30%"></div>
-                        </div>
-                        <p class="text-xs text-gray-500 mt-1">1,500,000 / 5,000,000 ريال</p>
+                    
+                    <div class="mt-6">
+                        <p class="text-sm">الرصيد المتاح</p>
+                        <h3 id="balance" class="text-3xl font-bold mt-1">
+                            <span class="animate-pulse">0.00</span> <span class="text-xl">ريال يمني</span>
+                        </h3>
                     </div>
-                    <button onclick="showSection('savings')" class="w-full mt-3 py-2 bg-blue-50 text-blue-600 rounded-lg text-sm font-bold hover:bg-blue-100">
+                    
+                    <div class="grid grid-cols-2 gap-4 mt-6">
+                        <div class="text-center">
+                            <p class="text-sm opacity-80">الدخل الشهري</p>
+                            <p id="monthly-income" class="font-bold">0 <span class="text-xs">ريال</span></p>
+                        </div>
+                        <div class="text-center">
+                            <p class="text-sm opacity-80">المصروف الشهري</p>
+                            <p id="monthly-expense" class="font-bold">0 <span class="text-xs">ريال</span></p>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- أهداف الادخار -->
+                <div class="bg-white rounded-2xl shadow-lg p-4">
+                    <h3 class="font-bold text-lg mb-4 border-b pb-2"><i class="fas fa-bullseye ml-2"></i> أهداف الادخار</h3>
+                    <div id="savings-goals" class="space-y-3">
+                        <!-- سيتم ملؤها جافاسكريبت -->
+                    </div>
+                    <button onclick="addSavingsGoal()" class="w-full mt-3 py-2 bg-blue-50 text-blue-600 rounded-lg text-sm font-bold hover:bg-blue-100">
                         <i class="fas fa-plus ml-1"></i> إضافة هدف جديد
                     </button>
                 </div>
             </div>
-        </div>
 
-        <!-- المحتوى الرئيسي -->
-        <div class="md:w-3/4">
-            <!-- الإشعارات -->
-            <div id="notifications-panel" class="hidden mb-6 bg-white rounded-2xl shadow-lg p-4">
-                <div class="flex justify-between items-center mb-4">
-                    <h3 class="font-bold text-lg"><i class="fas fa-bell ml-2"></i> الإشعارات</h3>
-                    <button onclick="clearNotifications()" class="text-sm text-blue-600">تحديد الكل كمقروء</button>
-                </div>
-                <div id="notifications-list" class="space-y-3">
-                    <!-- سيتم ملؤها جافاسكريبت -->
-                </div>
-            </div>
-
-            <!-- الرسوم البيانية -->
-            <div class="bg-white rounded-2xl shadow-lg p-6 mb-6">
-                <h3 class="font-bold text-lg mb-4"><i class="fas fa-chart-bar ml-2"></i> نشاط الحساب الشهري</h3>
-                <div class="h-64">
-                    <canvas id="accountChart"></canvas>
-                </div>
-            </div>
-
-            <!-- الشبكة الرئيسية للخدمات -->
-            <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
-                <!-- الإيداع والسحب -->
-                <div class="bg-white p-6 rounded-2xl shadow-lg border-t-4 border-green-500 card-hover">
-                    <h3 class="font-bold text-lg mb-4 border-b pb-2"><i class="fas fa-cash-register ml-2"></i> إيداع / سحب نقدي</h3>
-                    <div class="space-y-4">
-                        <div class="flex space-x-2 space-x-reverse">
-                            <button onclick="quickAmount(50000)" class="flex-1 bg-blue-50 text-blue-700 py-2 rounded-lg hover:bg-blue-100">50,000</button>
-                            <button onclick="quickAmount(100000)" class="flex-1 bg-blue-50 text-blue-700 py-2 rounded-lg hover:bg-blue-100">100,000</button>
-                            <button onclick="quickAmount(200000)" class="flex-1 bg-blue-50 text-blue-700 py-2 rounded-lg hover:bg-blue-100">200,000</button>
-                        </div>
-                        <input type="number" id="cash-amount" placeholder="أدخل المبلغ" class="w-full p-3 border-2 border-gray-200 rounded-xl outline-none focus:border-blue-500 text-lg">
-                        <div class="grid grid-cols-2 gap-3">
-                            <button onclick="handleCash('deposit')" class="bg-gradient-to-r from-green-500 to-green-600 text-white py-3 rounded-xl font-bold hover:from-green-600 hover:to-green-700 transition flex items-center justify-center">
-                                <i class="fas fa-arrow-down ml-2"></i> إيداع
-                            </button>
-                            <button onclick="handleCash('withdraw')" class="bg-gradient-to-r from-red-500 to-red-600 text-white py-3 rounded-xl font-bold hover:from-red-600 hover:to-red-700 transition flex items-center justify-center">
-                                <i class="fas fa-arrow-up ml-2"></i> سحب
-                            </button>
-                        </div>
-                        <p class="text-xs text-gray-500 text-center">الحد اليومي للسحب: 1,000,000 ريال يمني</p>
+            <!-- المحتوى الرئيسي -->
+            <div class="md:w-3/4">
+                <!-- الإشعارات -->
+                <div id="notifications-panel" class="hidden mb-6 bg-white rounded-2xl shadow-lg p-4">
+                    <div class="flex justify-between items-center mb-4">
+                        <h3 class="font-bold text-lg"><i class="fas fa-bell ml-2"></i> الإشعارات</h3>
+                        <button onclick="clearNotifications()" class="text-sm text-blue-600">تحديد الكل كمقروء</button>
+                    </div>
+                    <div id="notifications-list" class="space-y-3">
+                        <!-- سيتم ملؤها جافاسكريبت -->
                     </div>
                 </div>
 
-                <!-- حوالات جديدة -->
-                <div class="bg-white p-6 rounded-2xl shadow-lg border-t-4 border-blue-800 card-hover">
-                    <h3 class="font-bold text-lg mb-4 border-b pb-2"><i class="fas fa-paper-plane ml-2"></i> إرسال حوالة جديدة</h3>
-                    <div class="space-y-3">
-                        <div class="grid grid-cols-2 gap-3">
-                            <select id="remit-type" class="p-2 border rounded-lg">
+                <!-- الشبكة الرئيسية للخدمات -->
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
+                    <!-- الإيداع والسحب -->
+                    <div class="bg-white p-6 rounded-2xl shadow-lg border-t-4 border-green-500 card-hover">
+                        <h3 class="font-bold text-lg mb-4 border-b pb-2"><i class="fas fa-cash-register ml-2"></i> إيداع / سحب نقدي</h3>
+                        <div class="space-y-4">
+                            <div class="flex space-x-2 space-x-reverse">
+                                <button onclick="quickAmount(50000)" class="flex-1 bg-blue-50 text-blue-700 py-2 rounded-lg hover:bg-blue-100">50,000</button>
+                                <button onclick="quickAmount(100000)" class="flex-1 bg-blue-50 text-blue-700 py-2 rounded-lg hover:bg-blue-100">100,000</button>
+                                <button onclick="quickAmount(200000)" class="flex-1 bg-blue-50 text-blue-700 py-2 rounded-lg hover:bg-blue-100">200,000</button>
+                            </div>
+                            <input type="number" id="cash-amount" placeholder="أدخل المبلغ" class="w-full p-3 border-2 border-gray-200 rounded-xl outline-none focus:border-blue-500 text-lg">
+                            <div class="grid grid-cols-2 gap-3">
+                                <button onclick="handleCash('deposit')" class="bg-gradient-to-r from-green-500 to-green-600 text-white py-3 rounded-xl font-bold hover:from-green-600 hover:to-green-700 transition flex items-center justify-center">
+                                    <i class="fas fa-arrow-down ml-2"></i> إيداع
+                                </button>
+                                <button onclick="handleCash('withdraw')" class="bg-gradient-to-r from-red-500 to-red-600 text-white py-3 rounded-xl font-bold hover:from-red-600 hover:to-red-700 transition flex items-center justify-center">
+                                    <i class="fas fa-arrow-up ml-2"></i> سحب
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- حوالات جديدة -->
+                    <div class="bg-white p-6 rounded-2xl shadow-lg border-t-4 border-blue-800 card-hover">
+                        <h3 class="font-bold text-lg mb-4 border-b pb-2"><i class="fas fa-paper-plane ml-2"></i> إرسال حوالة جديدة</h3>
+                        <div class="space-y-3">
+                            <select id="remit-type" class="w-full p-3 border rounded-lg">
                                 <option value="internal">داخل البنك</option>
                                 <option value="external">خارج البنك</option>
                                 <option value="international">دولية</option>
                             </select>
-                            <select id="remit-speed" class="p-2 border rounded-lg">
-                                <option value="normal">عادية (1-2 يوم)</option>
-                                <option value="express">مستعجلة (ساعات)</option>
-                            </select>
+                            <input type="text" id="remit-name" placeholder="اسم المستلم الكامل" class="w-full p-3 border rounded-lg">
+                            <input type="text" id="remit-account" placeholder="رقم حساب المستلم (اختياري)" class="w-full p-3 border rounded-lg">
+                            <input type="text" id="remit-phone" placeholder="رقم هاتف المستلم" class="w-full p-3 border rounded-lg">
+                            <input type="number" id="remit-amount" placeholder="المبلغ" class="w-full p-3 border rounded-lg">
+                            <button onclick="sendRemittance()" class="w-full bg-gradient-to-r from-blue-800 to-blue-900 text-white py-3 rounded-xl font-bold hover:from-blue-900 hover:to-blue-950 transition">
+                                <i class="fas fa-paper-plane ml-2"></i> تأكيد الإرسال
+                            </button>
                         </div>
-                        <input type="text" id="remit-name" placeholder="اسم المستلم الكامل" class="w-full p-3 border rounded-lg">
-                        <input type="text" id="remit-phone" placeholder="رقم هاتف المستلم" class="w-full p-3 border rounded-lg">
-                        <input type="number" id="remit-amount" placeholder="المبلغ" class="w-full p-3 border rounded-lg">
-                        <div class="flex items-center space-x-2 space-x-reverse">
-                            <input type="checkbox" id="save-beneficiary" class="rounded">
-                            <label for="save-beneficiary" class="text-sm">حفظ المستلم في قائمة المستفيدين</label>
+                    </div>
+
+                    <!-- استلام حوالة -->
+                    <div class="bg-white p-6 rounded-2xl shadow-lg border-t-4 border-yellow-500 card-hover">
+                        <h3 class="font-bold text-lg mb-4 border-b pb-2"><i class="fas fa-key ml-2"></i> استلام حوالة واردة</h3>
+                        <p class="text-sm text-gray-500 mb-4">أدخل رقم الحوالة المكون من 8 أرقام</p>
+                        <div class="space-y-3">
+                            <input type="text" id="ref-number" placeholder="رقم الحوالة #REF" class="w-full p-3 border-2 border-gray-200 rounded-lg">
+                            <button onclick="receiveRemittance()" class="w-full bg-gradient-to-r from-yellow-500 to-yellow-600 text-blue-900 py-3 rounded-xl font-bold hover:from-yellow-600 hover:to-yellow-700 transition">
+                                <i class="fas fa-unlock ml-2"></i> صرف الحوالة
+                            </button>
                         </div>
-                        <button onclick="sendRemittance()" class="w-full bg-gradient-to-r from-blue-800 to-blue-900 text-white py-3 rounded-xl font-bold hover:from-blue-900 hover:to-blue-950 transition">
-                            <i class="fas fa-paper-plane ml-2"></i> تأكيد الإرسال
-                        </button>
                     </div>
-                </div>
 
-                <!-- استلام حوالة -->
-                <div class="bg-white p-6 rounded-2xl shadow-lg border-t-4 border-yellow-500 card-hover">
-                    <h3 class="font-bold text-lg mb-4 border-b pb-2"><i class="fas fa-key ml-2"></i> استلام حوالة واردة</h3>
-                    <p class="text-sm text-gray-500 mb-4">أدخل رقم الحوالة المكون من 8 أرقام والرقم السري</p>
-                    <div class="space-y-3">
-                        <input type="text" id="ref-number" placeholder="رقم الحوالة #REF" class="w-full p-3 border-2 border-gray-200 rounded-lg">
-                        <input type="password" id="ref-pin" placeholder="الرقم السري (4 أرقام)" class="w-full p-3 border-2 border-gray-200 rounded-lg" maxlength="4">
-                        <button onclick="receiveRemittance()" class="w-full bg-gradient-to-r from-yellow-500 to-yellow-600 text-blue-900 py-3 rounded-xl font-bold hover:from-yellow-600 hover:to-yellow-700 transition">
-                            <i class="fas fa-unlock ml-2"></i> صرف الحوالة
-                        </button>
-                    </div>
-                    <div class="mt-4 p-3 bg-blue-50 rounded-lg">
-                        <p class="text-sm font-bold text-blue-800"><i class="fas fa-info-circle ml-2"></i> معلومة:</p>
-                        <p class="text-xs text-blue-700 mt-1">العمولة: 1% للحوالات العادية، 2% للمستعجلة</p>
-                    </div>
-                </div>
-
-                <!-- آلة حاسبة التمويل -->
-                <div class="bg-white p-6 rounded-2xl shadow-lg border-t-4 border-purple-500 card-hover">
-                    <h3 class="font-bold text-lg mb-4 border-b pb-2"><i class="fas fa-calculator ml-2"></i> آلة حاسبة التمويل</h3>
-                    <div class="space-y-4">
-                        <div>
-                            <label class="block text-sm mb-1">مبلغ التمويل</label>
-                            <input type="range" id="loan-amount" min="100000" max="10000000" step="100000" value="5000000" class="w-full">
-                            <div class="flex justify-between text-xs">
-                                <span>100,000</span>
-                                <span id="loan-amount-display" class="font-bold">5,000,000</span>
-                                <span>10,000,000</span>
+                    <!-- آلة حاسبة التمويل -->
+                    <div class="bg-white p-6 rounded-2xl shadow-lg border-t-4 border-purple-500 card-hover">
+                        <h3 class="font-bold text-lg mb-4 border-b pb-2"><i class="fas fa-calculator ml-2"></i> آلة حاسبة التمويل</h3>
+                        <div class="space-y-4">
+                            <div>
+                                <label class="block text-sm mb-1">مبلغ التمويل</label>
+                                <input type="range" id="loan-amount" min="100000" max="10000000" step="100000" value="5000000" class="w-full">
+                                <div class="flex justify-between text-xs">
+                                    <span>100,000</span>
+                                    <span id="loan-amount-display" class="font-bold">5,000,000</span>
+                                    <span>10,000,000</span>
+                                </div>
                             </div>
-                        </div>
-                        <div>
-                            <label class="block text-sm mb-1">المدة (شهر)</label>
-                            <input type="range" id="loan-period" min="6" max="60" step="6" value="24" class="w-full">
-                            <div class="flex justify-between text-xs">
-                                <span>6</span>
-                                <span id="loan-period-display" class="font-bold">24</span>
-                                <span>60</span>
+                            <div>
+                                <label class="block text-sm mb-1">المدة (شهر)</label>
+                                <input type="range" id="loan-period" min="6" max="60" step="6" value="24" class="w-full">
+                                <div class="flex justify-between text-xs">
+                                    <span>6</span>
+                                    <span id="loan-period-display" class="font-bold">24</span>
+                                    <span>60</span>
+                                </div>
                             </div>
+                            <div class="p-3 bg-purple-50 rounded-lg">
+                                <p class="text-sm font-bold text-purple-800">القسط الشهري:</p>
+                                <p id="monthly-payment" class="text-2xl font-bold text-purple-900">0 ريال</p>
+                            </div>
+                            <button onclick="applyForLoan()" class="w-full bg-gradient-to-r from-purple-500 to-purple-600 text-white py-3 rounded-xl font-bold hover:from-purple-600 hover:to-purple-700 transition">
+                                <i class="fas fa-file-signature ml-2"></i> تقديم طلب تمويل
+                            </button>
                         </div>
-                        <div class="p-3 bg-purple-50 rounded-lg">
-                            <p class="text-sm font-bold text-purple-800">القسط الشهري:</p>
-                            <p id="monthly-payment" class="text-2xl font-bold text-purple-900">0 ريال</p>
-                            <p class="text-xs text-purple-700 mt-1">إجمالي المبلغ: <span id="total-loan">0</span> ريال</p>
-                        </div>
-                        <button onclick="applyForLoan()" class="w-full bg-gradient-to-r from-purple-500 to-purple-600 text-white py-3 rounded-xl font-bold hover:from-purple-600 hover:to-purple-700 transition">
-                            <i class="fas fa-file-signature ml-2"></i> تقديم طلب تمويل
+                    </div>
+                </div>
+
+                <!-- آخر العمليات -->
+                <div class="bg-white rounded-2xl shadow-lg p-6">
+                    <div class="flex justify-between items-center mb-4">
+                        <h3 class="font-bold text-lg"><i class="fas fa-history ml-2"></i> آخر العمليات</h3>
+                        <button onclick="loadTransactions()" class="text-blue-600 hover:text-blue-800">
+                            <i class="fas fa-sync-alt ml-2"></i> تحديث
                         </button>
                     </div>
-                </div>
-            </div>
-
-            <!-- لوحة التحكم والإحصائيات -->
-            <div class="grid grid-cols-1 md:grid-cols-4 gap-4 mb-6">
-                <div class="bg-gradient-to-r from-blue-500 to-blue-600 text-white p-4 rounded-xl">
-                    <p class="text-sm">إجمالي الإيداعات</p>
-                    <p class="text-2xl font-bold" id="total-deposits">0 ريال</p>
-                </div>
-                <div class="bg-gradient-to-r from-green-500 to-green-600 text-white p-4 rounded-xl">
-                    <p class="text-sm">إجمالي الحوالات</p>
-                    <p class="text-2xl font-bold" id="total-transfers">0 ريال</p>
-                </div>
-                <div class="bg-gradient-to-r from-purple-500 to-purple-600 text-white p-4 rounded-xl">
-                    <p class="text-sm">الفواتير المسددة</p>
-                    <p class="text-2xl font-bold" id="total-bills">0 ريال</p>
-                </div>
-                <div class="bg-gradient-to-r from-yellow-500 to-yellow-600 text-white p-4 rounded-xl">
-                    <p class="text-sm">التمويل المتاح</p>
-                    <p class="text-2xl font-bold" id="available-credit">50,000 ريال</p>
-                </div>
-            </div>
-
-            <!-- آخر العمليات مع التصفية -->
-            <div class="bg-white rounded-2xl shadow-lg p-6">
-                <div class="flex justify-between items-center mb-4">
-                    <h3 class="font-bold text-lg"><i class="fas fa-history ml-2"></i> آخر العمليات</h3>
-                    <div class="flex space-x-2 space-x-reverse">
-                        <select id="filter-type" onchange="filterTransactions()" class="p-2 border rounded-lg text-sm">
-                            <option value="all">جميع العمليات</option>
-                            <option value="deposit">الإيداعات</option>
-                            <option value="withdraw">السحوبات</option>
-                            <option value="transfer">الحوالات</option>
-                            <option value="bill">الفواتير</option>
-                        </select>
-                        <input type="date" id="filter-date" onchange="filterTransactions()" class="p-2 border rounded-lg text-sm">
+                    <div id="transactions-list" class="space-y-3 max-h-96 overflow-y-auto scrollbar-thin p-2">
+                        <!-- سيتم ملؤها جافاسكريبت -->
                     </div>
                 </div>
-                <div id="logs" class="space-y-3 max-h-96 overflow-y-auto scrollbar-thin p-2">
-                    <!-- سيتم ملؤها جافاسكريبت -->
+            </div>
+        </div>
+
+        <!-- نافذة تأكيد -->
+        <div id="confirm-modal" class="hidden fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+            <div class="bg-white rounded-2xl p-6 max-w-md w-full mx-4">
+                <h3 class="font-bold text-lg mb-4" id="confirm-title">تأكيد العملية</h3>
+                <p id="confirm-message" class="mb-6"></p>
+                <div class="grid grid-cols-2 gap-3">
+                    <button onclick="confirmAction(true)" class="bg-green-600 text-white py-3 rounded-xl font-bold hover:bg-green-700">تأكيد</button>
+                    <button onclick="confirmAction(false)" class="bg-red-600 text-white py-3 rounded-xl font-bold hover:bg-red-700">إلغاء</button>
                 </div>
-                <div class="mt-4 text-center">
-                    <button onclick="loadMoreTransactions()" class="text-blue-600 hover:text-blue-800 font-bold">
-                        <i class="fas fa-chevron-down ml-2"></i> تحميل المزيد
-                    </button>
+            </div>
+        </div>
+
+        <!-- نافذة إضافة هدف ادخار -->
+        <div id="savings-modal" class="hidden fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+            <div class="bg-white rounded-2xl p-6 max-w-md w-full mx-4">
+                <h3 class="font-bold text-lg mb-4">إضافة هدف ادخار جديد</h3>
+                <div class="space-y-4">
+                    <input type="text" id="goal-name" placeholder="اسم الهدف (مثال: حج بيت الله)" class="w-full p-3 border rounded-lg">
+                    <input type="number" id="goal-target" placeholder="المبلغ المستهدف" class="w-full p-3 border rounded-lg">
+                    <input type="date" id="goal-date" class="w-full p-3 border rounded-lg">
+                    <button onclick="saveSavingsGoal()" class="w-full bg-blue-600 text-white py-3 rounded-xl font-bold hover:bg-blue-700">حفظ الهدف</button>
                 </div>
             </div>
         </div>
     </div>
-
-    <!-- نافذة المحادثة -->
-    <div id="chat-window" class="hidden fixed bottom-4 left-4 w-80 bg-white rounded-2xl shadow-2xl z-50">
-        <div class="bg-gradient-to-r from-blue-800 to-blue-900 text-white p-4 rounded-t-2xl flex justify-between items-center">
-            <div class="flex items-center">
-                <i class="fas fa-robot text-xl ml-2"></i>
-                <div>
-                    <p class="font-bold">مساعد القطيبي</p>
-                    <p class="text-xs opacity-80">متصل الآن</p>
-                </div>
-            </div>
-            <button onclick="toggleChat()" class="text-white">
-                <i class="fas fa-times"></i>
-            </button>
-        </div>
-        <div id="chat-messages" class="h-64 overflow-y-auto p-4 space-y-3 scrollbar-thin">
-            <div class="bg-blue-50 p-3 rounded-lg max-w-[80%]">
-                <p class="text-sm">مرحباً! كيف يمكنني مساعدتك اليوم؟</p>
-                <p class="text-xs text-gray-500 mt-1">مساعد القطيبي • الآن</p>
-            </div>
-        </div>
-        <div class="p-4 border-t">
-            <div class="flex">
-                <input type="text" id="chat-input" placeholder="اكتب رسالتك..." class="flex-1 p-2 border rounded-lg outline-none">
-                <button onclick="sendChatMessage()" class="bg-blue-600 text-white p-2 rounded-lg mr-2">
-                    <i class="fas fa-paper-plane"></i>
-                </button>
-            </div>
-        </div>
-    </div>
-
-    <!-- زر فتح المحادثة -->
-    <button onclick="toggleChat()" class="fixed bottom-4 left-4 bg-blue-600 text-white p-4 rounded-full shadow-2xl z-40 hover:bg-blue-700">
-        <i class="fas fa-comments text-xl"></i>
-    </button>
-
-    <!-- زر العودة للأعلى -->
-    <button onclick="scrollToTop()" id="back-to-top" class="hidden fixed bottom-4 right-4 bg-gray-800 text-white p-3 rounded-full shadow-2xl z-40 hover:bg-gray-900">
-        <i class="fas fa-arrow-up"></i>
-    </button>
-
-    <!-- نافذة تأكيد المعاملة -->
-    <div id="confirm-modal" class="hidden fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
-        <div class="bg-white rounded-2xl p-6 max-w-md w-full mx-4">
-            <h3 class="font-bold text-lg mb-4 border-b pb-2" id="confirm-title">تأكيد العملية</h3>
-            <p id="confirm-message" class="mb-6">هل أنت متأكد من إجراء هذه العملية؟</p>
-            <div class="grid grid-cols-2 gap-3">
-                <button onclick="confirmTransaction(true)" class="bg-green-600 text-white py-3 rounded-xl font-bold hover:bg-green-700">نعم، تأكيد</button>
-                <button onclick="confirmTransaction(false)" class="bg-red-600 text-white py-3 rounded-xl font-bold hover:bg-red-700">إلغاء</button>
-            </div>
-        </div>
-    </div>
-
-    <!-- التذييل -->
-    <footer class="bg-gradient-to-l from-gray-800 to-gray-900 text-white mt-12 py-8">
-        <div class="max-w-7xl mx-auto px-4">
-            <div class="grid grid-cols-1 md:grid-cols-4 gap-8">
-                <div>
-                    <h4 class="font-bold text-xl mb-4">القطيبي الإلكتروني</h4>
-                    <p class="text-gray-300 text-sm">نظام مصرفي متكامل يقدم حلولاً مالية متطورة وآمنة لعملائنا الكرام.</p>
-                </div>
-                <div>
-                    <h5 class="font-bold mb-4">روابط سريعة</h5>
-                    <ul class="space-y-2 text-sm text-gray-300">
-                        <li><a href="#" class="hover:text-white">الشروط والأحكام</a></li>
-                        <li><a href="#" class="hover:text-white">الأسئلة الشائعة</a></li>
-                        <li><a href="#" class="hover:text-white">مراكز الخدمة</a></li>
-                        <li><a href="#" class="hover:text-white">الأسعار والعمولات</a></li>
-                    </ul>
-                </div>
-                <div>
-                    <h5 class="font-bold mb-4">تواصل معنا</h5>
-                    <ul class="space-y-2 text-sm text-gray-300">
-                        <li><i class="fas fa-phone ml-2"></i> 800-123-4567</li>
-                        <li><i class="fas fa-envelope ml-2"></i> support@alqutabi.com</li>
-                        <li><i class="fas fa-map-marker-alt ml-2"></i> صنعاء، اليمن</li>
-                    </ul>
-                </div>
-                <div>
-                    <h5 class="font-bold mb-4">حمل التطبيق</h5>
-                    <div class="space-y-3">
-                        <button class="w-full bg-gray-700 hover:bg-gray-600 py-2 rounded-lg flex items-center justify-center">
-                            <i class="fab fa-google-play ml-2"></i>
-                            <span>Google Play</span>
-                        </button>
-                        <button class="w-full bg-gray-700 hover:bg-gray-600 py-2 rounded-lg flex items-center justify-center">
-                            <i class="fab fa-app-store ml-2"></i>
-                            <span>App Store</span>
-                        </button>
-                    </div>
-                </div>
-            </div>
-            <div class="border-t border-gray-700 mt-8 pt-6 text-center text-sm text-gray-400">
-                <p>© 2023 بنك القطيبي. جميع الحقوق محفوظة. | <a href="#" class="hover:text-white">سياسة الخصوصية</a></p>
-            </div>
-        </div>
-    </footer>
 
     <script>
-        // 1. تهيئة Supabase
-        const supabaseUrl = 'https://YOUR_PROJECT.supabase.co'
-        const supabaseKey = 'YOUR_ANON_KEY'
-        const _supabase = supabase.createClient(supabaseUrl, supabaseKey)
-
-        // 2. بيانات المستخدم المحسنة
-        let user = {
-            id: 'USER_ID_HERE',
-            fullName: 'محمد أحمد القطيبي',
-            acc: '12209938',
-            balance: 1250000,
-            type: 'توفير',
-            lastLogin: 'اليوم 10:30 صباحاً',
-            monthlyIncome: 750000,
-            monthlyExpense: 420000
-        }
-
-        // 3. بيانات التطبيق
-        let transactions = []
-        let beneficiaries = []
-        let notifications = [
-            { id: 1, text: 'تم إيداع راتبك البالغ 750,000 ريال', time: 'قبل ساعة', read: false },
-            { id: 2, text: 'تمت الموافقة على طلب التمويل', time: 'قبل يومين', read: false },
-            { id: 3, text: 'خصم 10% على رسوم الحوالات لهذا الشهر', time: 'قبل 3 أيام', read: true }
-        ]
-
-        // 4. تهيئة الرسم البياني
-        let accountChart = null
-        function initChart() {
-            const ctx = document.getElementById('accountChart').getContext('2d')
-            accountChart = new Chart(ctx, {
-                type: 'line',
-                data: {
-                    labels: ['يناير', 'فبراير', 'مارس', 'أبريل', 'مايو', 'يونيو'],
-                    datasets: [{
-                        label: 'الإيداعات',
-                        data: [500000, 600000, 450000, 750000, 650000, 800000],
-                        borderColor: '#10B981',
-                        backgroundColor: 'rgba(16, 185, 129, 0.1)',
-                        tension: 0.4
-                    }, {
-                        label: 'السحوبات',
-                        data: [350000, 400000, 300000, 550000, 450000, 600000],
-                        borderColor: '#EF4444',
-                        backgroundColor: 'rgba(239, 68, 68, 0.1)',
-                        tension: 0.4
-                    }]
-                },
-                options: {
-                    responsive: true,
-                    maintainAspectRatio: false,
-                    plugins: {
-                        legend: {
-                            position: 'top',
-                            rtl: true
-                        }
-                    },
-                    scales: {
-                        y: {
-                            beginAtZero: true,
-                            ticks: {
-                                callback: function(value) {
-                                    return value.toLocaleString() + ' ريال'
-                                }
-                            }
-                        }
-                    }
-                }
-            })
-        }
-
-        // 5. تحديث واجهة المستخدم
-        function updateUI() {
-            document.getElementById('balance').innerText = user.balance.toLocaleString() + ' ريال يمني'
-            document.getElementById('user-name').innerText = user.fullName
-            document.getElementById('full-name').innerText = user.fullName
-            document.getElementById('user-acc').innerText = `${user.type} • ${user.acc}`
-            document.getElementById('last-login').innerText = user.lastLogin
-            document.getElementById('total-deposits').innerText = '2,750,000 ريال'
-            document.getElementById('total-transfers').innerText = '1,850,000 ريال'
-            document.getElementById('total-bills').innerText = '420,000 ريال'
+        // تكوين Supabase
+        const SUPABASE_URL = 'https://your-project.supabase.co'; // استبدل بـ URL مشروعك
+        const SUPABASE_ANON_KEY = 'your-anon-key'; // استبدل بـ مفتاحك العام
+        
+        // تهيئة عميل Supabase
+        const supabase = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+        
+        // حالة التطبيق
+        let currentUser = null;
+        let pendingAction = null;
+        let userBalance = 0;
+        
+        // مصادقة المستخدم
+        async function login() {
+            const accountNumber = document.getElementById('login-account').value.trim();
+            const pinCode = document.getElementById('login-pin').value.trim();
             
-            // تحديث شارة الإشعارات
-            const unread = notifications.filter(n => !n.read).length
-            const badge = document.getElementById('notification-badge')
-            if(unread > 0) {
-                badge.innerText = unread
-                badge.classList.remove('hidden')
-            } else {
-                badge.classList.add('hidden')
+            if (!accountNumber || !pinCode) {
+                showAlert('يرجى إدخال رقم الحساب والرقم السري', 'error');
+                return;
+            }
+            
+            try {
+                // البحث عن المستخدم في قاعدة البيانات
+                const { data: user, error } = await supabase
+                    .from('users')
+                    .select('*')
+                    .eq('account_number', accountNumber)
+                    .eq('pin_code', pinCode)
+                    .single();
+                
+                if (error) throw error;
+                
+                if (!user) {
+                    showAlert('رقم الحساب أو الرقم السري غير صحيح', 'error');
+                    return;
+                }
+                
+                if (!user.is_active) {
+                    showAlert('الحساب غير مفعل، يرجى التواصل مع الدعم', 'error');
+                    return;
+                }
+                
+                // تحديث وقت آخر دخول
+                await supabase
+                    .from('users')
+                    .update({ last_login: new Date().toISOString() })
+                    .eq('id', user.id);
+                
+                // حفظ بيانات المستخدم
+                currentUser = user;
+                userBalance = parseFloat(user.balance);
+                
+                // إخفاء شاشة الدخول وإظهار التطبيق
+                document.getElementById('login-screen').classList.add('hidden');
+                document.getElementById('app').classList.remove('hidden');
+                
+                // تحميل بيانات المستخدم
+                loadUserData();
+                loadNotifications();
+                loadTransactions();
+                loadSavingsGoals();
+                
+                // إضافة إشعار تسجيل دخول
+                await addNotification('تم تسجيل الدخول بنجاح إلى حسابك', 'success');
+                
+                showAlert(`مرحباً بك ${user.full_name}`, 'success');
+                
+            } catch (error) {
+                console.error('خطأ في تسجيل الدخول:', error);
+                showAlert('حدث خطأ أثناء تسجيل الدخول', 'error');
             }
         }
-
-        // 6. ميزة الإيداع والسحب المحسنة
-        let pendingTransaction = null
+        
+        // تحميل بيانات المستخدم
+        async function loadUserData() {
+            if (!currentUser) return;
+            
+            try {
+                // تحديث بيانات المستخدم من قاعدة البيانات
+                const { data: user, error } = await supabase
+                    .from('users')
+                    .select('*')
+                    .eq('id', currentUser.id)
+                    .single();
+                
+                if (error) throw error;
+                
+                currentUser = user;
+                userBalance = parseFloat(user.balance);
+                
+                // تحديث واجهة المستخدم
+                document.getElementById('user-name').textContent = user.full_name;
+                document.getElementById('full-name').textContent = user.full_name;
+                document.getElementById('user-acc').textContent = `${user.account_type} • ${user.account_number}`;
+                document.getElementById('balance').textContent = `${userBalance.toLocaleString()} ريال يمني`;
+                document.getElementById('monthly-income').textContent = `${parseFloat(user.monthly_income).toLocaleString()} ريال`;
+                document.getElementById('monthly-expense').textContent = `${parseFloat(user.monthly_expense).toLocaleString()} ريال`;
+                
+                if (user.last_login) {
+                    const lastLogin = new Date(user.last_login);
+                    document.getElementById('last-login').textContent = lastLogin.toLocaleString('ar-EG');
+                }
+                
+            } catch (error) {
+                console.error('خطأ في تحميل بيانات المستخدم:', error);
+            }
+        }
+        
+        // إيداع أو سحب نقدي
         async function handleCash(type) {
-            const amount = parseFloat(document.getElementById('cash-amount').value)
-            if(!amount || amount <= 0) {
-                showAlert('أدخل مبلغاً صحيحاً', 'error')
-                return
+            if (!currentUser) return;
+            
+            const amountInput = document.getElementById('cash-amount');
+            const amount = parseFloat(amountInput.value);
+            
+            if (!amount || amount <= 0) {
+                showAlert('يرجى إدخال مبلغ صحيح', 'error');
+                return;
             }
-
-            if(type === 'withdraw') {
-                if(amount > user.balance) {
-                    showAlert('الرصيد غير كافٍ', 'error')
-                    return
-                }
-                if(amount > 1000000) {
-                    showAlert('تجاوز الحد اليومي للسحب (1,000,000 ريال)', 'error')
-                    return
-                }
+            
+            if (type === 'withdraw' && amount > userBalance) {
+                showAlert('الرصيد غير كافٍ', 'error');
+                return;
             }
-
-            pendingTransaction = { type, amount }
+            
+            // تأكيد العملية
+            pendingAction = {
+                type: 'cash',
+                operation: type,
+                amount: amount
+            };
+            
             showConfirmModal(
                 type === 'deposit' ? 'تأكيد الإيداع' : 'تأكيد السحب',
                 `هل أنت متأكد من ${type === 'deposit' ? 'إيداع' : 'سحب'} مبلغ ${amount.toLocaleString()} ريال؟`
-            )
+            );
         }
-
-        // 7. ميزة الحوالات المحسنة
-        async function sendRemittance() {
-            const name = document.getElementById('remit-name').value
-            const phone = document.getElementById('remit-phone').value
-            const amount = parseFloat(document.getElementById('remit-amount').value)
-            const type = document.getElementById('remit-type').value
-            const speed = document.getElementById('remit-speed').value
-            const save = document.getElementById('save-beneficiary').checked
-
-            if(!name || !phone || !amount) {
-                showAlert('يرجى ملء جميع الحقول', 'error')
-                return
-            }
-
-            if(amount > user.balance) {
-                showAlert('الرصيد لا يسمح', 'error')
-                return
-            }
-
-            const ref = "QT-" + Math.floor(10000000 + Math.random() * 90000000)
-            const fee = speed === 'express' ? amount * 0.02 : amount * 0.01
-            const total = amount + fee
-
-            if(total > user.balance) {
-                showAlert(`الرصيد لا يكفي (بالإضافة للعمولة ${fee.toLocaleString()} ريال)`, 'error')
-                return
-            }
-
-            user.balance -= total
-            updateUI()
+        
+        // تنفيذ عملية الإيداع/السحب بعد التأكيد
+        async function executeCashOperation() {
+            if (!pendingAction || !currentUser) return;
             
-            const logMsg = `حوالة ${type === 'international' ? 'دولية' : type === 'external' ? 'خارجية' : 'داخلية'} لـ ${name}: ${amount.toLocaleString()} ريال`
-            addLog(logMsg, 'transfer')
+            const { operation, amount } = pendingAction;
+            const newBalance = operation === 'deposit' ? userBalance + amount : userBalance - amount;
             
-            if(save) {
-                beneficiaries.push({ name, phone, type: 'حوالة' })
-                showAlert('تم حفظ المستلم في قائمة المستفيدين', 'success')
-            }
-
-            showAlert(`تم الإرسال بنجاح! رقم الحوالة: ${ref}\nالعمولة: ${fee.toLocaleString()} ريال`, 'success')
-            
-            // إضافة إشعار
-            addNotification(`تم إرسال حوالة بمبلغ ${amount.toLocaleString()} ريال`)
-        }
-
-        // 8. ميزة استلام الحوالات المحسنة
-        async function receiveRemittance() {
-            const ref = document.getElementById('ref-number').value
-            const pin = document.getElementById('ref-pin').value
-
-            if(!ref || !pin) {
-                showAlert('يرجى إدخال رقم الحوالة والرقم السري', 'error')
-                return
-            }
-
-            if(pin.length !== 4 || !/^\d+$/.test(pin)) {
-                showAlert('الرقم السري يجب أن يكون 4 أرقام', 'error')
-                return
-            }
-
-            // محاكاة استلام حوالة بمبلغ عشوائي
-            const amount = Math.floor(10000 + Math.random() * 500000)
-            user.balance += amount
-            updateUI()
-            addLog(`استلام حوالة رقم ${ref} بمبلغ ${amount.toLocaleString()} ريال`, 'deposit')
-            showAlert(`تم صرف الحوالة بنجاح! المبلغ: ${amount.toLocaleString()} ريال`, 'success')
-        }
-
-        // 9. ميزة آلة حاسبة التمويل
-        function updateLoanCalculator() {
-            const amount = parseInt(document.getElementById('loan-amount').value)
-            const period = parseInt(document.getElementById('loan-period').value)
-            
-            document.getElementById('loan-amount-display').textContent = amount.toLocaleString()
-            document.getElementById('loan-period-display').textContent = period
-            
-            const interestRate = 0.05 // 5% سنوياً
-            const monthlyRate = interestRate / 12
-            const monthlyPayment = (amount * monthlyRate * Math.pow(1 + monthlyRate, period)) / 
-                                  (Math.pow(1 + monthlyRate, period) - 1)
-            const totalPayment = monthlyPayment * period
-            
-            document.getElementById('monthly-payment').textContent = Math.round(monthlyPayment).toLocaleString() + ' ريال'
-            document.getElementById('total-loan').textContent = Math.round(totalPayment).toLocaleString()
-        }
-
-        function applyForLoan() {
-            const amount = parseInt(document.getElementById('loan-amount').value)
-            showConfirmModal(
-                'طلب تمويل',
-                `هل تريد تقديم طلب تمويل بمبلغ ${amount.toLocaleString()} ريال لمدة ${document.getElementById('loan-period').value} شهراً؟`
-            )
-        }
-
-        // 10. ميزة الإشعارات
-        function toggleNotifications() {
-            const panel = document.getElementById('notifications-panel')
-            panel.classList.toggle('hidden')
-            if(!panel.classList.contains('hidden')) {
-                updateNotifications()
-            }
-        }
-
-        function updateNotifications() {
-            const container = document.getElementById('notifications-list')
-            container.innerHTML = ''
-            
-            notifications.forEach(notif => {
-                const div = document.createElement('div')
-                div.className = `p-3 rounded-lg ${notif.read ? 'bg-gray-50' : 'bg-blue-50 border-r-4 border-blue-500'}`
-                div.innerHTML = `
-                    <p class="text-sm ${notif.read ? '' : 'font-bold'}">${notif.text}</p>
-                    <p class="text-xs text-gray-500 mt-1">${notif.time}</p>
-                `
-                container.appendChild(div)
-            })
-        }
-
-        function clearNotifications() {
-            notifications.forEach(n => n.read = true)
-            updateNotifications()
-            updateUI()
-            showAlert('تم تحديد جميع الإشعارات كمقروءة', 'success')
-        }
-
-        function addNotification(text) {
-            notifications.unshift({
-                id: notifications.length + 1,
-                text,
-                time: 'الآن',
-                read: false
-            })
-            updateUI()
-        }
-
-        // 11. ميزة الدردشة الآلية
-        let chatVisible = false
-        function toggleChat() {
-            const chatWindow = document.getElementById('chat-window')
-            chatWindow.classList.toggle('hidden')
-            chatVisible = !chatVisible
-        }
-
-        function sendChatMessage() {
-            const input = document.getElementById('chat-input')
-            const message = input.value.trim()
-            if(!message) return
-            
-            const messagesContainer = document.getElementById('chat-messages')
-            
-            // رسالة المستخدم
-            const userMsg = document.createElement('div')
-            userMsg.className = 'bg-gray-100 p-3 rounded-lg max-w-[80%] mr-auto'
-            userMsg.innerHTML = `
-                <p class="text-sm">${message}</p>
-                <p class="text-xs text-gray-500 mt-1">أنت • الآن</p>
-            `
-            messagesContainer.appendChild(userMsg)
-            
-            input.value = ''
-            
-            // رد المساعد (محاكاة)
-            setTimeout(() => {
-                const responses = [
-                    'تم استلام رسالتك، كيف يمكنني مساعدتك بشكل أفضل؟',
-                    'هل تريد معرفة رصيدك أو إجراء معاملة؟',
-                    'يمكنني مساعدتك في دفع الفواتير أو إرسال الحوالات',
-                    'هل تواجه مشكلة في استخدام النظام؟',
-                    'تم تسجيل طلبك وسيتم الرد عليك خلال 24 ساعة'
-                ]
-                const randomResponse = responses[Math.floor(Math.random() * responses.length)]
+            try {
+                // تحديث رصيد المستخدم
+                const { error: updateError } = await supabase
+                    .from('users')
+                    .update({ balance: newBalance })
+                    .eq('id', currentUser.id);
                 
-                const botMsg = document.createElement('div')
-                botMsg.className = 'bg-blue-50 p-3 rounded-lg max-w-[80%]'
-                botMsg.innerHTML = `
-                    <p class="text-sm">${randomResponse}</p>
-                    <p class="text-xs text-gray-500 mt-1">مساعد القطيبي • الآن</p>
-                `
-                messagesContainer.appendChild(botMsg)
-                messagesContainer.scrollTop = messagesContainer.scrollHeight
-            }, 1000)
-        }
-
-        // 12. ميزة الوضع الليلي
-        let darkMode = false
-        function toggleDarkMode() {
-            darkMode = !darkMode
-            if(darkMode) {
-                document.body.classList.add('bg-gray-900', 'text-white')
-                document.body.classList.remove('bg-gradient-to-br', 'from-gray-50', 'to-gray-100')
-                document.querySelectorAll('.bg-white').forEach(el => {
-                    el.classList.add('bg-gray-800', 'text-white')
-                    el.classList.remove('bg-white')
-                })
-            } else {
-                document.body.classList.remove('bg-gray-900', 'text-white')
-                document.body.classList.add('bg-gradient-to-br', 'from-gray-50', 'to-gray-100')
-                document.querySelectorAll('.bg-gray-800').forEach(el => {
-                    el.classList.remove('bg-gray-800', 'text-white')
-                    el.classList.add('bg-white')
-                })
+                if (updateError) throw updateError;
+                
+                // تسجيل المعاملة
+                const { error: transactionError } = await supabase
+                    .from('transactions')
+                    .insert({
+                        user_id: currentUser.id,
+                        type: operation,
+                        amount: amount,
+                        description: operation === 'deposit' ? 'إيداع نقدي' : 'سحب نقدي',
+                        status: 'completed'
+                    });
+                
+                if (transactionError) throw transactionError;
+                
+                // تحديث البيانات المحلية
+                userBalance = newBalance;
+                
+                // تحديث الواجهة
+                await loadUserData();
+                await loadTransactions();
+                
+                // إضافة إشعار
+                await addNotification(
+                    `${operation === 'deposit' ? 'تم إيداع' : 'تم سحب'} مبلغ ${amount.toLocaleString()} ريال`,
+                    'success'
+                );
+                
+                showAlert(
+                    `${operation === 'deposit' ? 'تم الإيداع' : 'تم السحب'} بنجاح`,
+                    'success'
+                );
+                
+            } catch (error) {
+                console.error('خطأ في العملية:', error);
+                showAlert('حدث خطأ أثناء تنفيذ العملية', 'error');
             }
         }
-
-        // 13. ميزة التصفية والبحث
-        function filterTransactions() {
-            const type = document.getElementById('filter-type').value
-            const date = document.getElementById('filter-date').value
+        
+        // إرسال حوالة
+        async function sendRemittance() {
+            if (!currentUser) return;
             
-            let filtered = transactions
-            if(type !== 'all') {
-                filtered = filtered.filter(t => t.type === type)
-            }
-            if(date) {
-                filtered = filtered.filter(t => t.date === date)
+            const recipientName = document.getElementById('remit-name').value.trim();
+            const recipientAccount = document.getElementById('remit-account').value.trim();
+            const recipientPhone = document.getElementById('remit-phone').value.trim();
+            const amount = parseFloat(document.getElementById('remit-amount').value);
+            const transferType = document.getElementById('remit-type').value;
+            
+            if (!recipientName || !recipientPhone || !amount) {
+                showAlert('يرجى ملء جميع الحقول المطلوبة', 'error');
+                return;
             }
             
-            displayTransactions(filtered)
-        }
-
-        function loadMoreTransactions() {
-            // محاكاة تحميل المزيد من العمليات
-            for(let i = 0; i < 5; i++) {
-                const types = ['deposit', 'withdraw', 'transfer', 'bill']
-                const randomType = types[Math.floor(Math.random() * types.length)]
-                addLog(`عملية إضافية #${i+1}`, randomType)
+            if (amount > userBalance) {
+                showAlert('الرصيد غير كافٍ', 'error');
+                return;
             }
-            showAlert('تم تحميل 5 عمليات إضافية', 'success')
-        }
-
-        // 14. ميزة العودة للأعلى
-        window.onscroll = function() {
-            const button = document.getElementById('back-to-top')
-            if(document.body.scrollTop > 200 || document.documentElement.scrollTop > 200) {
-                button.classList.remove('hidden')
-            } else {
-                button.classList.add('hidden')
-            }
-        }
-
-        function scrollToTop() {
-            window.scrollTo({ top: 0, behavior: 'smooth' })
-        }
-
-        // 15. ميزة تسجيل الخروج
-        function logout() {
-            showConfirmModal('تسجيل الخروج', 'هل أنت متأكد من تسجيل الخروج؟')
-        }
-
-        // 16. ميزة المبالغ السريعة
-        function quickAmount(amount) {
-            document.getElementById('cash-amount').value = amount
-        }
-
-        // 17. ميزة الأقسام المختلفة
-        function showSection(section) {
-            showAlert(`سيتم فتح قسم ${section} قريباً`, 'info')
-        }
-
-        // 18. دوال مساعدة
-        function showAlert(message, type = 'info') {
-            // محاكاة تنبيه
-            alert(message)
-        }
-
-        function showConfirmModal(title, message) {
-            document.getElementById('confirm-title').textContent = title
-            document.getElementById('confirm-message').textContent = message
-            document.getElementById('confirm-modal').classList.remove('hidden')
-        }
-
-        function confirmTransaction(confirmed) {
-            document.getElementById('confirm-modal').classList.add('hidden')
             
-            if(confirmed && pendingTransaction) {
-                const { type, amount } = pendingTransaction
-                if(type === 'deposit') {
-                    user.balance += amount
-                } else {
-                    user.balance -= amount
+            // تأكيد العملية
+            pendingAction = {
+                type: 'remittance',
+                recipientName: recipientName,
+                recipientAccount: recipientAccount,
+                recipientPhone: recipientPhone,
+                amount: amount,
+                transferType: transferType
+            };
+            
+            showConfirmModal(
+                'تأكيد إرسال الحوالة',
+                `هل أنت متأكد من إرسال حوالة بمبلغ ${amount.toLocaleString()} ريال إلى ${recipientName}؟`
+            );
+        }
+        
+        // تنفيذ إرسال الحوالة بعد التأكيد
+        async function executeRemittance() {
+            if (!pendingAction || !currentUser) return;
+            
+            const { recipientName, recipientAccount, recipientPhone, amount, transferType } = pendingAction;
+            
+            try {
+                // حساب العمولة
+                const fee = transferType === 'international' ? amount * 0.03 : amount * 0.01;
+                const totalAmount = amount + fee;
+                
+                if (totalAmount > userBalance) {
+                    showAlert(`الرصيد لا يكفي (بالإضافة للعمولة ${fee.toLocaleString()} ريال)`, 'error');
+                    return;
                 }
-                updateUI()
-                addLog(`${type === 'deposit' ? 'إيداع' : 'سحب'}: ${amount.toLocaleString()} ريال`, type)
-                showAlert(`تم ${type === 'deposit' ? 'الإيداع' : 'السحب'} بنجاح`, 'success')
-                pendingTransaction = null
+                
+                // إنشاء رقم مرجعي للحوالة
+                const referenceNumber = 'QT' + Date.now().toString().slice(-8);
+                
+                // تخفيض رصيد المستخدم
+                const newBalance = userBalance - totalAmount;
+                
+                const { error: updateError } = await supabase
+                    .from('users')
+                    .update({ balance: newBalance })
+                    .eq('id', currentUser.id);
+                
+                if (updateError) throw updateError;
+                
+                // تسجيل الحوالة
+                const { error: remittanceError } = await supabase
+                    .from('remittances')
+                    .insert({
+                        sender_id: currentUser.id,
+                        sender_name: currentUser.full_name,
+                        sender_account: currentUser.account_number,
+                        recipient_name: recipientName,
+                        recipient_phone: recipientPhone,
+                        recipient_account: recipientAccount,
+                        amount: amount,
+                        reference_number: referenceNumber,
+                        transfer_type: transferType,
+                        fee: fee,
+                        status: 'pending',
+                        pin_code: Math.floor(1000 + Math.random() * 9000).toString()
+                    });
+                
+                if (remittanceError) throw remittanceError;
+                
+                // تسجيل المعاملة
+                const { error: transactionError } = await supabase
+                    .from('transactions')
+                    .insert({
+                        user_id: currentUser.id,
+                        type: 'transfer',
+                        amount: amount,
+                        description: `حوالة إلى ${recipientName}`,
+                        reference_number: referenceNumber,
+                        recipient_name: recipientName,
+                        fee: fee,
+                        status: 'completed'
+                    });
+                
+                if (transactionError) throw transactionError;
+                
+                // تحديث البيانات المحلية
+                userBalance = newBalance;
+                
+                // تحديث الواجهة
+                await loadUserData();
+                await loadTransactions();
+                
+                // إضافة إشعار
+                await addNotification(
+                    `تم إرسال حوالة بمبلغ ${amount.toLocaleString()} ريال إلى ${recipientName}`,
+                    'success'
+                );
+                
+                showAlert(
+                    `تم إرسال الحوالة بنجاح! رقم الحوالة: ${referenceNumber}`,
+                    'success'
+                );
+                
+                // تفريغ الحقول
+                document.getElementById('remit-name').value = '';
+                document.getElementById('remit-account').value = '';
+                document.getElementById('remit-phone').value = '';
+                document.getElementById('remit-amount').value = '';
+                
+            } catch (error) {
+                console.error('خطأ في إرسال الحوالة:', error);
+                showAlert('حدث خطأ أثناء إرسال الحوالة', 'error');
             }
         }
-
-        function addLog(message, type = 'info') {
-            const logBox = document.getElementById('logs')
-            const now = new Date().toLocaleTimeString('ar-EG')
-            const date = new Date().toLocaleDateString('ar-EG')
+        
+        // استلام حوالة
+        async function receiveRemittance() {
+            const referenceNumber = document.getElementById('ref-number').value.trim();
             
-            const typeIcons = {
-                deposit: '⬇️',
-                withdraw: '⬆️',
-                transfer: '↪️',
-                bill: '🧾',
-                info: 'ℹ️'
+            if (!referenceNumber) {
+                showAlert('يرجى إدخال رقم الحوالة', 'error');
+                return;
             }
             
-            const typeColors = {
-                deposit: 'text-green-600',
-                withdraw: 'text-red-600',
-                transfer: 'text-blue-600',
-                bill: 'text-purple-600',
-                info: 'text-gray-600'
+            try {
+                // البحث عن الحوالة
+                const { data: remittance, error } = await supabase
+                    .from('remittances')
+                    .select('*')
+                    .eq('reference_number', referenceNumber)
+                    .eq('status', 'pending')
+                    .single();
+                
+                if (error) {
+                    if (error.code === 'PGRST116') {
+                        showAlert('رقم الحوالة غير صحيح أو تم صرفه مسبقاً', 'error');
+                    } else {
+                        throw error;
+                    }
+                    return;
+                }
+                
+                // تحقق إذا كانت الحوالة منتهية الصلاحية (أكثر من 30 يوم)
+                const createdDate = new Date(remittance.created_at);
+                const now = new Date();
+                const daysDiff = (now - createdDate) / (1000 * 60 * 60 * 24);
+                
+                if (daysDiff > 30) {
+                    showAlert('الحوالة منتهية الصلاحية (أكثر من 30 يوم)', 'error');
+                    return;
+                }
+                
+                // تأكيد العملية
+                pendingAction = {
+                    type: 'receive_remittance',
+                    remittance: remittance
+                };
+                
+                showConfirmModal(
+                    'تأكيد صرف الحوالة',
+                    `هل أنت متأكد من صرف حوالة بمبلغ ${parseFloat(remittance.amount).toLocaleString()} ريال من ${remittance.sender_name}؟`
+                );
+                
+            } catch (error) {
+                console.error('خطأ في البحث عن الحوالة:', error);
+                showAlert('حدث خطأ أثناء البحث عن الحوالة', 'error');
             }
-            
-            const logEntry = document.createElement('div')
-            logEntry.className = 'p-3 border-b border-gray-100 last:border-0'
-            logEntry.innerHTML = `
-                <div class="flex justify-between items-center">
-                    <div class="flex items-center">
-                        <span class="ml-2">${typeIcons[type] || 'ℹ️'}</span>
-                        <span class="${typeColors[type]} font-bold">${message}</span>
-                    </div>
-                    <div class="text-xs text-gray-500">
-                        <span>${date}</span>
-                        <span class="mr-2">${now}</span>
-                    </div>
-                </div>
-            `
-            
-            logBox.insertBefore(logEntry, logBox.firstChild)
-            transactions.unshift({ message, type, date: new Date().toISOString().split('T')[0] })
         }
-
-        // 19. تهيئة التطبيق
+        
+        // تنفيذ استلام الحوالة بعد التأكيد
+        async function executeReceiveRemittance() {
+            if (!pendingAction || !currentUser) return;
+            
+            const { remittance } = pendingAction;
+            
+            try {
+                // زيادة رصيد المستخدم
+                const newBalance = userBalance + parseFloat(remittance.amount);
+                
+                const { error: updateError } = await supabase
+                    .from('users')
+                    .update({ balance: newBalance })
+                    .eq('id', currentUser.id);
+                
+                if (updateError) throw updateError;
+                
+                // تحديث حالة الحوالة
+                const { error: remittanceError } = await supabase
+                    .from('remittances')
+                    .update({
+                        status: 'collected',
+                        collected_at: new Date().toISOString()
+                    })
+                    .eq('id', remittance.id);
+                
+                if (remittanceError) throw remittanceError;
+                
+                // تسجيل المعاملة
+                const { error: transactionError } = await supabase
+                    .from('transactions')
+                    .insert({
+                        user_id: currentUser.id,
+                        type: 'deposit',
+                        amount: remittance.amount,
+                        description: `استلام حوالة من ${remittance.sender_name}`,
+                        reference_number: remittance.reference_number,
+                        status: 'completed'
+                    });
+                
+                if (transactionError) throw transactionError;
+                
+                // تحديث البيانات المحلية
+                userBalance = newBalance;
+                
+                // تحديث الواجهة
+                await loadUserData();
+                await loadTransactions();
+                
+                // إضافة إشعار
+                await addNotification(
+                    `تم استلام حوالة بمبلغ ${parseFloat(remittance.amount).toLocaleString()} ريال`,
+                    'success'
+                );
+                
+                showAlert(
+                    `تم صرف الحوالة بنجاح! المبلغ: ${parseFloat(remittance.amount).toLocaleString()} ريال`,
+                    'success'
+                );
+                
+                // تفريغ الحقل
+                document.getElementById('ref-number').value = '';
+                
+            } catch (error) {
+                console.error('خطأ في صرف الحوالة:', error);
+                showAlert('حدث خطأ أثناء صرف الحوالة', 'error');
+            }
+        }
+        
+        // تحميل المعاملات
+        async function loadTransactions() {
+            if (!currentUser) return;
+            
+            try {
+                const { data: transactions, error } = await supabase
+                    .from('transactions')
+                    .select('*')
+                    .eq('user_id', currentUser.id)
+                    .order('created_at', { ascending: false })
+                    .limit(20);
+                
+                if (error) throw error;
+                
+                const container = document.getElementById('transactions-list');
+                container.innerHTML = '';
+                
+                if (!transactions || transactions.length === 0) {
+                    container.innerHTML = '<p class="text-center text-gray-500 py-4">لا توجد معاملات سابقة</p>';
+                    return;
+                }
+                
+                transactions.forEach(transaction => {
+                    const transactionElement = document.createElement('div');
+                    transactionElement.className = 'p-4 border rounded-lg hover:bg-gray-50';
+                    
+                    const typeIcons = {
+                        'deposit': { icon: '⬇️', color: 'text-green-600', bg: 'bg-green-50' },
+                        'withdraw': { icon: '⬆️', color: 'text-red-600', bg: 'bg-red-50' },
+                        'transfer': { icon: '↪️', color: 'text-blue-600', bg: 'bg-blue-50' },
+                        'bill': { icon: '🧾', color: 'text-purple-600', bg: 'bg-purple-50' },
+                        'loan': { icon: '💰', color: 'text-yellow-600', bg: 'bg-yellow-50' }
+                    };
+                    
+                    const typeInfo = typeIcons[transaction.type] || { icon: 'ℹ️', color: 'text-gray-600', bg: 'bg-gray-50' };
+                    const amount = parseFloat(transaction.amount).toLocaleString();
+                    const date = new Date(transaction.created_at).toLocaleString('ar-EG');
+                    
+                    transactionElement.innerHTML = `
+                        <div class="flex justify-between items-center">
+                            <div class="flex items-center">
+                                <span class="text-xl ml-2">${typeInfo.icon}</span>
+                                <div>
+                                    <p class="font-bold ${typeInfo.color}">${transaction.description || transaction.type}</p>
+                                    ${transaction.reference_number ? 
+                                        `<p class="text-xs text-gray-500">رقم المرجع: ${transaction.reference_number}</p>` : ''}
+                                    ${transaction.recipient_name ? 
+                                        `<p class="text-xs text-gray-500">المستلم: ${transaction.recipient_name}</p>` : ''}
+                                </div>
+                            </div>
+                            <div class="text-left">
+                                <p class="font-bold ${transaction.type === 'deposit' ? 'text-green-600' : 'text-red-600'}">
+                                    ${transaction.type === 'deposit' ? '+' : '-'} ${amount} ريال
+                                </p>
+                                <p class="text-xs text-gray-500">${date}</p>
+                            </div>
+                        </div>
+                    `;
+                    
+                    container.appendChild(transactionElement);
+                });
+                
+            } catch (error) {
+                console.error('خطأ في تحميل المعاملات:', error);
+                showAlert('حدث خطأ أثناء تحميل المعاملات', 'error');
+            }
+        }
+        
+        // تحميل الإشعارات
+        async function loadNotifications() {
+            if (!currentUser) return;
+            
+            try {
+                const { data: notifications, error } = await supabase
+                    .from('notifications')
+                    .select('*')
+                    .eq('user_id', currentUser.id)
+                    .order('created_at', { ascending: false })
+                    .limit(10);
+                
+                if (error) throw error;
+                
+                const container = document.getElementById('notifications-list');
+                const badge = document.getElementById('notification-badge');
+                
+                if (notifications && notifications.length > 0) {
+                    const unreadCount = notifications.filter(n => !n.is_read).length;
+                    
+                    if (unreadCount > 0) {
+                        badge.textContent = unreadCount;
+                        badge.classList.remove('hidden');
+                    } else {
+                        badge.classList.add('hidden');
+                    }
+                    
+                    container.innerHTML = '';
+                    notifications.forEach(notification => {
+                        const notificationElement = document.createElement('div');
+                        notificationElement.className = `p-3 rounded-lg ${notification.is_read ? 'bg-gray-50' : 'bg-blue-50 border-r-4 border-blue-500'}`;
+                        
+                        notificationElement.innerHTML = `
+                            <p class="text-sm ${notification.is_read ? '' : 'font-bold'}">${notification.message}</p>
+                            <p class="text-xs text-gray-500 mt-1">
+                                ${new Date(notification.created_at).toLocaleString('ar-EG')}
+                            </p>
+                        `;
+                        
+                        container.appendChild(notificationElement);
+                    });
+                }
+                
+            } catch (error) {
+                console.error('خطأ في تحميل الإشعارات:', error);
+            }
+        }
+        
+        // تحميل أهداف الادخار
+        async function loadSavingsGoals() {
+            if (!currentUser) return;
+            
+            try {
+                const { data: goals, error } = await supabase
+                    .from('savings_goals')
+                    .select('*')
+                    .eq('user_id', currentUser.id)
+                    .order('created_at', { ascending: false });
+                
+                if (error) throw error;
+                
+                const container = document.getElementById('savings-goals');
+                container.innerHTML = '';
+                
+                if (!goals || goals.length === 0) {
+                    container.innerHTML = '<p class="text-center text-gray-500 py-2">لا توجد أهداف ادخار</p>';
+                    return;
+                }
+                
+                goals.forEach(goal => {
+                    const goalElement = document.createElement('div');
+                    const percentage = (parseFloat(goal.current_amount) / parseFloat(goal.target_amount)) * 100;
+                    
+                    goalElement.innerHTML = `
+                        <div class="mb-2">
+                            <div class="flex justify-between text-sm mb-1">
+                                <span class="font-bold">${goal.name}</span>
+                                <span>${Math.round(percentage)}%</span>
+                            </div>
+                            <div class="w-full bg-gray-200 rounded-full h-2">
+                                <div class="h-2 rounded-full" style="width: ${percentage}%; background-color: ${goal.color || '#10B981'}"></div>
+                            </div>
+                            <p class="text-xs text-gray-500 mt-1">
+                                ${parseFloat(goal.current_amount).toLocaleString()} / ${parseFloat(goal.target_amount).toLocaleString()} ريال
+                            </p>
+                        </div>
+                    `;
+                    
+                    container.appendChild(goalElement);
+                });
+                
+            } catch (error) {
+                console.error('خطأ في تحميل أهداف الادخار:', error);
+            }
+        }
+        
+        // إضافة هدف ادخار جديد
+        function addSavingsGoal() {
+            document.getElementById('savings-modal').classList.remove('hidden');
+        }
+        
+        async function saveSavingsGoal() {
+            const name = document.getElementById('goal-name').value.trim();
+            const target = parseFloat(document.getElementById('goal-target').value);
+            const date = document.getElementById('goal-date').value;
+            
+            if (!name || !target || target <= 0) {
+                showAlert('يرجى إدخال بيانات صحيحة', 'error');
+                return;
+            }
+            
+            try {
+                const { error } = await supabase
+                    .from('savings_goals')
+                    .insert({
+                        user_id: currentUser.id,
+                        name: name,
+                        target_amount: target,
+                        target_date: date || null,
+                        current_amount: 0
+                    });
+                
+                if (error) throw error;
+                
+                document.getElementById('savings-modal').classList.add('hidden');
+                document.getElementById('goal-name').value = '';
+                document.getElementById('goal-target').value = '';
+                document.getElementById('goal-date').value = '';
+                
+                await loadSavingsGoals();
+                await addNotification(`تم إضافة هدف ادخار جديد: ${name}`, 'success');
+                showAlert('تم إضافة هدف الادخار بنجاح', 'success');
+                
+            } catch (error) {
+                console.error('خطأ في إضافة هدف الادخار:', error);
+                showAlert('حدث خطأ أثناء إضافة هدف الادخار', 'error');
+            }
+        }
+        
+        // إضافة إشعار
+        async function addNotification(message, type = 'info') {
+            if (!currentUser) return;
+            
+            try {
+                const title = type === 'success' ? 'عملية ناجحة' : 
+                             type === 'error' ? 'خطأ' : 
+                             type === 'warning' ? 'تحذير' : 'معلومة';
+                
+                const { error } = await supabase
+                    .from('notifications')
+                    .insert({
+                        user_id: currentUser.id,
+                        title: title,
+                        message: message,
+                        type: type
+                    });
+                
+                if (error) throw error;
+                
+                await loadNotifications();
+                
+            } catch (error) {
+                console.error('خطأ في إضافة الإشعار:', error);
+            }
+        }
+        
+        // تعيين جميع الإشعارات كمقروءة
+        async function clearNotifications() {
+            if (!currentUser) return;
+            
+            try {
+                const { error } = await supabase
+                    .from('notifications')
+                    .update({ is_read: true })
+                    .eq('user_id', currentUser.id)
+                    .eq('is_read', false);
+                
+                if (error) throw error;
+                
+                await loadNotifications();
+                showAlert('تم تحديد جميع الإشعارات كمقروءة', 'success');
+                
+            } catch (error) {
+                console.error('خطأ في تحديث الإشعارات:', error);
+                showAlert('حدث خطأ أثناء تحديث الإشعارات', 'error');
+            }
+        }
+        
+        // تطبيق للتمويل
+        async function applyForLoan() {
+            const amount = parseInt(document.getElementById('loan-amount').value);
+            const period = parseInt(document.getElementById('loan-period').value);
+            
+            pendingAction = {
+                type: 'loan_application',
+                amount: amount,
+                period: period
+            };
+            
+            showConfirmModal(
+                'تقديم طلب تمويل',
+                `هل تريد تقديم طلب تمويل بمبلغ ${amount.toLocaleString()} ريال لمدة ${period} شهراً؟`
+            );
+        }
+        
+        async function executeLoanApplication() {
+            if (!pendingAction || !currentUser) return;
+            
+            const { amount, period } = pendingAction;
+            const interestRate = 0.05; // 5%
+            const monthlyRate = interestRate / 12;
+            const monthlyPayment = (amount * monthlyRate * Math.pow(1 + monthlyRate, period)) / 
+                                  (Math.pow(1 + monthlyRate, period) - 1);
+            const totalAmount = monthlyPayment * period;
+            
+            try {
+                const { error } = await supabase
+                    .from('loans')
+                    .insert({
+                        user_id: currentUser.id,
+                        amount: amount,
+                        period_months: period,
+                        monthly_payment: monthlyPayment,
+                        total_amount: totalAmount,
+                        interest_rate: interestRate,
+                        status: 'pending',
+                        purpose: 'تمويل شخصي'
+                    });
+                
+                if (error) throw error;
+                
+                await addNotification(
+                    `تم تقديم طلب تمويل بمبلغ ${amount.toLocaleString()} ريال، سيتم الرد خلال 48 ساعة`,
+                    'success'
+                );
+                
+                showAlert(
+                    'تم تقديم طلب التمويل بنجاح، سيتم التواصل معك قريباً',
+                    'success'
+                );
+                
+            } catch (error) {
+                console.error('خطأ في تقديم طلب التمويل:', error);
+                showAlert('حدث خطأ أثناء تقديم طلب التمويل', 'error');
+            }
+        }
+        
+        // وظائف مساعدة
+        function quickAmount(amount) {
+            document.getElementById('cash-amount').value = amount;
+        }
+        
+        function showConfirmModal(title, message) {
+            document.getElementById('confirm-title').textContent = title;
+            document.getElementById('confirm-message').textContent = message;
+            document.getElementById('confirm-modal').classList.remove('hidden');
+        }
+        
+        function confirmAction(confirmed) {
+            document.getElementById('confirm-modal').classList.add('hidden');
+            
+            if (!confirmed || !pendingAction) {
+                pendingAction = null;
+                return;
+            }
+            
+            switch (pendingAction.type) {
+                case 'cash':
+                    executeCashOperation();
+                    break;
+                case 'remittance':
+                    executeRemittance();
+                    break;
+                case 'receive_remittance':
+                    executeReceiveRemittance();
+                    break;
+                case 'loan_application':
+                    executeLoanApplication();
+                    break;
+            }
+            
+            pendingAction = null;
+        }
+        
+        function showAlert(message, type = 'info') {
+            // في تطبيق حقيقي، استخدم مكتبة مثل SweetAlert2
+            alert(`${type === 'error' ? '⚠️ خطأ: ' : type === 'success' ? '✅ نجاح: ' : 'ℹ️ معلومة: '}${message}`);
+        }
+        
+        function toggleNotifications() {
+            const panel = document.getElementById('notifications-panel');
+            panel.classList.toggle('hidden');
+        }
+        
+        function logout() {
+            currentUser = null;
+            userBalance = 0;
+            pendingAction = null;
+            
+            document.getElementById('app').classList.add('hidden');
+            document.getElementById('login-screen').classList.remove('hidden');
+            
+            // تفريغ حقول الدخول
+            document.getElementById('login-pin').value = '';
+        }
+        
+        // تهيئة آلة حاسبة التمويل
+        function updateLoanCalculator() {
+            const amount = parseInt(document.getElementById('loan-amount').value);
+            const period = parseInt(document.getElementById('loan-period').value);
+            
+            document.getElementById('loan-amount-display').textContent = amount.toLocaleString();
+            document.getElementById('loan-period-display').textContent = period;
+            
+            const interestRate = 0.05;
+            const monthlyRate = interestRate / 12;
+            const monthlyPayment = (amount * monthlyRate * Math.pow(1 + monthlyRate, period)) / 
+                                  (Math.pow(1 + monthlyRate, period) - 1);
+            
+            document.getElementById('monthly-payment').textContent = Math.round(monthlyPayment).toLocaleString() + ' ريال';
+        }
+        
+        // تهيئة التطبيق
         document.addEventListener('DOMContentLoaded', function() {
-            // تعيين التاريخ الحالي
-            document.getElementById('filter-date').valueAsDate = new Date()
+            // إعداد مستمعي الأحداث للمنزلقات
+            document.getElementById('loan-amount').addEventListener('input', updateLoanCalculator);
+            document.getElementById('loan-period').addEventListener('input', updateLoanCalculator);
             
-            // إضافة بعض العمليات الافتراضية
-            addLog('إيداع راتب: 750,000 ريال', 'deposit')
-            addLog('فاتورة كهرباء: 35,000 ريال', 'bill')
-            addLog('حوالة لأخي: 200,000 ريال', 'transfer')
-            addLog('سحب نقدي: 150,000 ريال', 'withdraw')
-            addLog('شراء من السوق: 85,000 ريال', 'withdraw')
+            // تهيئة آلة حاسبة التمويل
+            updateLoanCalculator();
             
-            // تحديث واجهة المستخدم
-            updateUI()
-            initChart()
-            updateLoanCalculator()
-            
-            // إضافة مستمعين للأحداث
-            document.getElementById('loan-amount').addEventListener('input', updateLoanCalculator)
-            document.getElementById('loan-period').addEventListener('input', updateLoanCalculator)
-            document.getElementById('chat-input').addEventListener('keypress', function(e) {
-                if(e.key === 'Enter') sendChatMessage()
-            })
-            
-            // إظهار رسالة ترحيب
-            setTimeout(() => {
-                showAlert('مرحباً بك في نظام القطيبي المتكامل!', 'success')
-            }, 1000)
-        })
-
-        // 20. ميزة الطباعة والإبلاغ
-        function printStatement() {
-            window.print()
-        }
-
-        // إضافة اختصارات لوحة المفاتيح
-        document.addEventListener('keydown', function(e) {
-            // Ctrl + D للإيداع
-            if(e.ctrlKey && e.key === 'd') {
-                e.preventDefault()
-                document.getElementById('cash-amount').focus()
-            }
-            // Ctrl + W للسحب
-            if(e.ctrlKey && e.key === 'w') {
-                e.preventDefault()
-                document.getElementById('cash-amount').focus()
-                setTimeout(() => handleCash('withdraw'), 100)
-            }
-            // Ctrl + N للإشعارات
-            if(e.ctrlKey && e.key === 'n') {
-                e.preventDefault()
-                toggleNotifications()
-            }
-            // Esc لإغلاق النوافذ
-            if(e.key === 'Escape') {
-                document.getElementById('confirm-modal').classList.add('hidden')
-                document.getElementById('notifications-panel').classList.add('hidden')
-                document.getElementById('chat-window').classList.add('hidden')
-            }
-        })
-
+            // إعداد تاريخ اليوم كحد أدنى لأهداف الادخار
+            const today = new Date().toISOString().split('T')[0];
+            document.getElementById('goal-date').min = today;
+        });
     </script>
 </body>
-                    </html>
+                        </html>
